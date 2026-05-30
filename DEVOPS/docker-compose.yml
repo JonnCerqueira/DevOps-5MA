@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  gateway:
+    build: ./services/gateway
+    ports:
+      - "80:80"
+    environment:
+      - ORDERS_URL=http://orders:8080
+    networks:
+      - loja-net
+
+  orders:
+    build: ./services/orders
+    environment:
+      - DB_HOST=postgres
+      - DB_USER=admin
+      - DB_PASS=secret
+    depends_on:
+      - postgres
+    networks:
+      - loja-net
+
+  payments:
+    build: ./services/payments
+    networks:
+      - loja-net
+
+  inventory:
+    build: ./services/inventory
+    networks:
+      - loja-net
+
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=secret
+      - POSTGRES_DB=loja_db
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - loja-net
+
+networks:
+  loja-net:
+    driver: bridge
+
+volumes:
+  pgdata:
